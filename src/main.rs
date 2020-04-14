@@ -12,6 +12,7 @@ struct Commit {
 struct EntryTree {
     name: String,
     fullpath: String,
+    expand: bool,
     children: Vec<EntryTree>,
 }
 
@@ -21,6 +22,7 @@ impl EntryTree {
         EntryTree {
             name : String::from(root_name),
             fullpath : String::from(root_name),
+            expand : false,
             children : Vec::new(),
         }
     }
@@ -47,11 +49,13 @@ impl EntryTree {
         for _ in 0..depth {
             print!("   ");
         }
-        let indicator: &str = if self.children.len()>0 { "+" } else { "-" };
+        let indicator: &str = if self.children.len()>0 && self.expand==false { "+" } else { "-" };
         println!("{} {} [{}]", indicator, self.name, self.fullpath);
         // print children
-        for c in self.children.iter() {
-            c.print(depth+1);
+        if self.expand {
+            for c in self.children.iter() {
+                c.print(depth+1);
+            }
         }
     }
 }
@@ -75,6 +79,12 @@ fn main() {
             node = node.get_or_create(t);
         }
     });
+
+    // expand a few nodes
+    tree.expand = true;
+    let pfm = tree.get_or_create("platform");
+    pfm.expand = true;
+    pfm.get_or_create("ros2").expand = true;
 
     tree.print(0);
 
